@@ -1,4 +1,6 @@
-import { Chrome, Drawer, Footer, Nav, type Page } from './components/Shared';
+import { Chrome, Footer, Nav, type Page } from './components/Shared';
+import About from './pages/About';
+import Book from './pages/Book';
 import Gallery from './pages/Gallery';
 import Home from './pages/Home';
 
@@ -8,9 +10,8 @@ export default function App({ page }: { page: Page }) {
     <>
       <Chrome />
       <Nav page={page} />
-      {page === 'gallery' ? <Gallery /> : <Home />}
+      {page === 'about' ? <About /> : page === 'book' ? <Book /> : page === 'gallery' ? <Gallery /> : <Home />}
       <Footer page={page} />
-      <Drawer />
     </>
   );
 }

@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   build: {
     target: 'es2022', assetsDir: 'app', chunkSizeWarningLimit: 800,
-    // one page per HTML file: the home page and the gallery
-    rollupOptions: { input: { main: 'index.html', gallery: 'gallery.html' } },
+    // one page per HTML file: home, gallery, booking and about
+    rollupOptions: { input: { main: 'index.html', gallery: 'gallery.html', book: 'book.html', about: 'about.html' } },
   },
 });

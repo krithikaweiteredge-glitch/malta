@@ -85,6 +85,17 @@ export const GALLERY = [
   g('p21_015', 'Venues', 'Topiary figures in a limestone garden'),
 ];
 
+/* About us: taken from effectstech.in/about (lightly proofread). */
+export const ABOUT = {
+  motto: 'Think events, think Effects Tech.',
+  story: [
+    'With over 18 years of experience in providing turnkey solutions for events, Effects Tech is India’s leading events production house with a pool of talented professionals and an expansive infrastructure, best equipped to take on events and exhibitions of any magnitude. Led by some of the best in the business, Effects Tech has you covered with expert teams of sound, light and video professionals at your disposal.',
+    'Whether it’s fabrication, sound and light design or trussing, we’ve got you covered. Our roster of events includes corporate conferences, fashion shows, brand launches, themed events, live shows, road shows and promotional activities for a variety of event management companies and top corporate houses.',
+  ],
+  stats: [{ value: '18+', label: 'years of experience' }, { value: '1000', label: 'projects' }, { value: '150', label: 'names who trust us' }],
+  founder: 'Sarosh started out twenty-five years ago with an event production company and morphed into set designing whilst handling bigger and bigger projects. It was a fait accompli for Patel’s event production company, Effects Tech, which was fluidly led into designing because of last-minute changes like location or requirements, or the designer not being too happy with the design as it was. This forced the company to always look at creative ways to improve or correct on the spot. Over a period of time the company also started basic designing for returning patrons, and before they knew it, voila, they were doing it all the time.',
+};
+
 /* Social links in the footer. Add each address when the studio confirms it; without one the name shows as plain text. */
 export const SOCIAL = [
   { name: 'Instagram', url: '' },

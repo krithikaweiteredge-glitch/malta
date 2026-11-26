@@ -108,7 +108,7 @@ export function start(page: Page) {
       const text = (t.closest?.('[data-cursor]') as HTMLElement | null)?.dataset.cursor ?? '';
       c.classList.toggle('is-label', !!text);
       c.classList.toggle('is-hidden', !!t.closest?.('[data-cursor-hide]'));
-      c.classList.toggle('is-ink', !!t.closest?.('.drawer__panel, .trail, .footer'));   // on blush surfaces the cursor turns wine
+      c.classList.toggle('is-ink', !!t.closest?.('.book__panel, .trail, .footer'));   // on blush surfaces the cursor turns wine
       if (text) label.textContent = text;
     });
   }
@@ -116,33 +116,6 @@ export function start(page: Page) {
   /* ---- Things that close with Escape ---- */
   const closers: (() => void)[] = [];
   addEventListener('keydown', (e) => { if (e.key === 'Escape') closers.forEach((f) => f()); });
-
-  /* ---- Enquiry drawer ---- */
-  const drawer = $('#drawer'), panel = $('.drawer__panel', drawer), veil = $('.drawer__veil', drawer);
-  const openDrawer = () => {
-    drawer.hidden = false; lenis?.stop();
-    gsap.fromTo(veil, { opacity: 0 }, { opacity: 1, duration: 0.6 });
-    gsap.fromTo(panel, { xPercent: 100 }, { xPercent: 0, duration: 1, ease: 'expo.out' });
-    gsap.fromTo($$('.drawer__panel > *, .form > *', drawer), { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, ease: 'expo.out', stagger: 0.035, delay: 0.15 });
-    setTimeout(() => $<HTMLInputElement>('input[name="names"]', drawer).focus(), 400);
-  };
-  const closeDrawer = () => {
-    if (drawer.hidden) return;
-    gsap.to(veil, { opacity: 0, duration: 0.5 });
-    gsap.to(panel, { xPercent: 100, duration: 0.7, ease: 'expo.in', onComplete: () => { drawer.hidden = true; } });
-    lenis?.start();
-  };
-  for (const b of $$('[data-open-drawer]')) b.addEventListener('click', openDrawer);
-  for (const b of $$('[data-close-drawer]')) b.addEventListener('click', closeDrawer);
-  closers.push(closeDrawer);
-  const form = $<HTMLFormElement>('#enquireForm');
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const d = new FormData(form), v = (k: string) => String(d.get(k) ?? '').trim();
-    const body = [`Names: ${v('names')}`, `Email: ${v('email')}`, `Date: ${v('date')}`, `Guests: ${v('guests')}`, `Venue: ${v('venue')}`, `Collection: ${v('collection')}`, '', v('message')].join('\n');
-    location.href = `mailto:${form.dataset.email}?subject=${encodeURIComponent(`Malta wedding — ${v('names')}`)}&body=${encodeURIComponent(body)}`;
-    $('#formDone').hidden = false;
-  });
 
   /* ---- Words and characters ---- */
   const splits = $$('[data-split]').map((el) => ({ el, chars: splitChars(el) }));
@@ -172,12 +145,12 @@ export function start(page: Page) {
   }
 
   /* ---- The page itself ---- */
-  const intro = page === 'home' ? home() : gallery();
+  const intro = page === 'home' ? home() : page === 'gallery' ? gallery() : page === 'book' ? book() : { ready: Promise.resolve(), after: pageHero };
 
   if (!reduced) {
     /* Headings: characters rise, each a little after the one before */
     for (const { el, chars } of splits) {
-      if (el.closest('.ghero')) continue;   // the gallery's heading rises with the page's opening, below
+      if (el.closest('.ghero, .book')) continue;   // these headings rise with their page's opening, below
       gsap.fromTo(chars, { yPercent: 150, rotate: 7 }, { yPercent: 0, rotate: 0, duration: 1.3, ease: 'expo.out', stagger: 0.018, scrollTrigger: { trigger: el, start: 'top 85%', once: true } });
     }
     /* The manifesto comes into focus, word by word */
@@ -277,6 +250,8 @@ export function start(page: Page) {
       ctx.translate(geo.tx, geo.ty); ctx.scale(s, s); ctx.translate(-geo.tx, -geo.ty);
       ctx.font = FONT(geo.fs); ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
       ctx.fillText('MALTA', geo.x0, geo.base);
+      // widen the cut-out a little, so the thinnest strokes show the film instead of breaking up
+      ctx.lineWidth = geo.fs * 0.012; ctx.lineJoin = 'miter'; ctx.strokeText('MALTA', geo.x0, geo.base);
       // a fine blush outline, so the hairlines of the Bodoni (too thin to show the film through) still read; it fades as the camera dives
       const a = 0.6 * Math.max(0, 1 - (s - 1) / 3);
       if (a > 0.01) {
@@ -386,6 +361,28 @@ export function start(page: Page) {
     return { ready, after };
   }
 
+  /* ================= Booking ================= */
+  function book() {
+    const form = $<HTMLFormElement>('#enquireForm');
+    // "Ask about Gold" on the home page arrives with that collection already chosen
+    const wanted = new URLSearchParams(location.search).get('collection');
+    const collection = form.elements.namedItem('collection') as HTMLSelectElement;
+    if (wanted && [...collection.options].some((o) => o.value === wanted)) collection.value = wanted;
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const d = new FormData(form), v = (k: string) => String(d.get(k) ?? '').trim();
+      const body = [`Names: ${v('names')}`, `Email: ${v('email')}`, `Date: ${v('date')}`, `Guests: ${v('guests')}`, `Venue: ${v('venue')}`, `Collection: ${v('collection')}`, '', v('message')].join('\n');
+      location.href = `mailto:${form.dataset.email}?subject=${encodeURIComponent(`Malta wedding — ${v('names')}`)}&body=${encodeURIComponent(body)}`;
+      $('#formDone').hidden = false;
+    });
+    const after = () => {
+      if (reduced) return;
+      gsap.fromTo($$('.book .ch'), { yPercent: 150, rotate: 7 }, { yPercent: 0, rotate: 0, duration: 1.3, ease: 'expo.out', stagger: 0.02 });
+      gsap.from('.book__intro > :not(h1), .book__panel', { y: 30, opacity: 0, duration: 1.1, ease: 'expo.out', stagger: 0.08, delay: 0.25 });
+    };
+    return { ready: Promise.resolve(), after };
+  }
+
   /* ================= Gallery ================= */
   function gallery() {
     /* Filters that rearrange the wall */
@@ -445,12 +442,13 @@ export function start(page: Page) {
       /* The strip of photographs leans away as the page scrolls */
       gsap.fromTo('.gstrip', { rotate: -2 }, { rotate: 2, ease: 'none', scrollTrigger: { trigger: '.gstrip', start: 'top bottom', end: 'bottom top', scrub: true } });
     }
-    const after = () => {
-      if (reduced) return;
-      const chars = $$('.ghero .ch');
-      gsap.fromTo(chars, { yPercent: 150, rotate: 7 }, { yPercent: 0, rotate: 0, duration: 1.4, ease: 'expo.out', stagger: 0.03 });
-      gsap.from('.ghero .eyebrow, .ghero__intro, .ghero__down', { y: 30, opacity: 0, duration: 1.2, ease: 'expo.out', stagger: 0.1, delay: 0.3 });
-    };
-    return { ready: Promise.resolve(), after };
+    return { ready: Promise.resolve(), after: pageHero };
+  }
+
+  /* The opening heading of the gallery and about pages */
+  function pageHero() {
+    if (reduced) return;
+    gsap.fromTo($$('.ghero .ch'), { yPercent: 150, rotate: 7 }, { yPercent: 0, rotate: 0, duration: 1.4, ease: 'expo.out', stagger: 0.03 });
+    gsap.from($$('.ghero .eyebrow, .ghero__intro, .ghero__down'), { y: 30, opacity: 0, duration: 1.2, ease: 'expo.out', stagger: 0.1, delay: 0.3 });
   }
 }

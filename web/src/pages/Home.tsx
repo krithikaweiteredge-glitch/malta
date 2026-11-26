@@ -129,7 +129,7 @@ export default function Home() {
                 </div>
                 <div className="col__more"><div>
                   <ul>{c.items.map((it) => <li key={it}>{it}</li>)}</ul>
-                  <button type="button" className="link" data-open-drawer>Ask about {c.name}</button>
+                  <a className="link" href={`book.html?collection=${c.name}`} data-page-link>Ask about {c.name}</a>
                 </div></div>
               </li>
             ))}
